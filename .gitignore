@@ -1,3 +1,7 @@
+# Useless folders
+results/*
+data/*
+
 # Model weights
 model_weights/
 archive/
