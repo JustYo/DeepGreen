@@ -10,7 +10,7 @@ from tensorflow import keras
 from tensorflow.keras.layers import Layer
 
 # Add the architecture path for the GreenNet and NMSE
-sys.path.append("../architecture/")
+sys.path.append("architecture")
 from GreenNet import GreenNet
 from NormalizedMeanSquaredError import NormalizedMeanSquaredError as NMSE
 
@@ -79,10 +79,10 @@ def evaluate_initial_models(save_prefix, train_data,
         model = construct_network(train_autoencoders_only=True, **network_config)
 
         # Compile the model
-        model.compile(loss=4*[loss_fn], optimizer=opt(lr=lr, **optimizer_opts))
+        model.compile(loss=4*[loss_fn], optimizer=opt(lr, **optimizer_opts))
 
         # Set up the Callback function
-        checkpoint_path_aec = save_prefix + 'checkpoint_aec_{}'.format(i)
+        checkpoint_path_aec = save_prefix + 'checkpoint_aec_{}'.format(i)+".weights.h5"
         cbs_aec = [keras.callbacks.ModelCheckpoint(checkpoint_path_aec,
                                                    save_weights_only=True,
                                                    monitor='val_loss',
@@ -100,10 +100,10 @@ def evaluate_initial_models(save_prefix, train_data,
         model.train_autoencoders_only = False
 
         # Re-compile the model
-        model.compile(loss=4*[loss_fn], optimizer=opt(lr=lr, **optimizer_opts))
+        model.compile(loss=4*[loss_fn], optimizer=opt(lr, **optimizer_opts))
 
         # Train full model
-        checkpoint_path_full = save_prefix + 'checkpoint_{}'.format(i)
+        checkpoint_path_full = save_prefix + 'checkpoint_{}'.format(i)+".weights.h5"
         cbs = [keras.callbacks.ModelCheckpoint(checkpoint_path_full,
                                                save_weights_only=True,
                                                monitor='val_loss',
@@ -121,14 +121,14 @@ def evaluate_initial_models(save_prefix, train_data,
         best_loss = model.evaluate(x=v_full[0], y=v_full[1], verbose=False)
 
         # Save the model
-        model_path = save_prefix + "model_{}".format(i)
+        model_path = save_prefix + "model_{}".format(i)+".keras"
         model.save(model_path)
 
         # Append the results to the model list
         results['full_hist'].append(full_hist.history.copy())
         results['aec_hist'].append(aec_hist.history.copy())
         results['lr'].append(lr)
-        results['best_loss'].append(best_loss[0])
+        results['best_loss'].append(int(best_loss))
         results['model_path'].append(model_path)
 
         # Delete the model variable and clear_session to remove any graph
@@ -138,7 +138,7 @@ def evaluate_initial_models(save_prefix, train_data,
     # Select the best model from the loop
     best_model_idc = np.argmin(results['best_loss'])
     best_model_path = results['model_path'][best_model_idc]
-
+    print(best_model_path)
     # Return the best model's path
     return results, best_model_path
 
@@ -156,7 +156,7 @@ def train_final_model(model_path: str, save_prefix: str,
                                        custom_objects=custom_objects)
 
     # set the place to save the checkpoint model weights
-    checkpoint_model_path = save_prefix + 'checkpoint_final'
+    checkpoint_model_path = save_prefix + 'checkpoint_final'+".weights.h5"
 
     # Define the callback function for training
     cbs = [keras.callbacks.ModelCheckpoint(checkpoint_model_path,
@@ -176,7 +176,7 @@ def train_final_model(model_path: str, save_prefix: str,
     model.load_weights(checkpoint_model_path)
 
     # Save the best model
-    model_path = save_prefix + 'final_model'
+    model_path = save_prefix + 'final_model' + ".keras"
     model.save(model_path)
 
     return hist.history, model_path
@@ -187,7 +187,7 @@ def save_results(results_path: str, random_seed: int,
     # Load the model
     model = tf.keras.models.load_model(model_path,
                                        custom_objects=custom_objects)
-    model.save(results_path + 'final_model')
+    model.save(results_path + 'final_model.keras')
     print("Best model saved to:", model_path)
 
     # Export the final model training dictionary
@@ -226,7 +226,7 @@ def run_experiment(random_seed, expt_name: str, data_file_prefix: str,
     train_data = get_data(data_file_prefix)
 
     # Set the prefix for where to save the results/checkpointed models
-    save_prefix = '../model_weights/{}/'.format(expt_name)
+    save_prefix = 'results/{}/'.format(expt_name)
 
     # Step 1 -- Train a collection of initial models
     # Autoencoders-only, then full model
@@ -244,7 +244,7 @@ def run_experiment(random_seed, expt_name: str, data_file_prefix: str,
                                                custom_objects)
 
     # Step 3 -- Save the results
-    results_path = '../results/{}/'.format(expt_name)
+    results_path = 'results/{}/'.format(expt_name)
     save_results(results_path, random_seed,
                  model_path, custom_objects,
                  final_hist, init_hist)

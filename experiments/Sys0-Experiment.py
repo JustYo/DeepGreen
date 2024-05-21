@@ -52,8 +52,8 @@ network_config = {'units_full': units_full,
 
 # Aggregate all the training options in one dictionary
 training_options = {'aec_only_epochs': 75, 
-                    'init_full_epochs': 250,
-                    'best_model_epochs': 2500,
+                    'init_full_epochs': 100,#250
+                    'best_model_epochs': 0,#2500
                     'num_init_models': 20, 
                     'loss_fn': NMSE(),
                     'optimizer': keras.optimizers.Adam,

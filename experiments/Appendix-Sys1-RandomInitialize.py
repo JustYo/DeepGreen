@@ -16,7 +16,7 @@ from NormalizedMeanSquaredError import NormalizedMeanSquaredError as NMSE
 
 # Example Experiment Script:
 expt_name = 'S1-NLSL1-Expt3-a'
-data_file_prefix = '../data/S1-NLSL1'
+data_file_prefix = 'data/S1-NLSL1'
 
 # Set size of latent space, and retrieve the 'full' size of the data
 units_latent = 20
@@ -52,9 +52,9 @@ network_config = {'units_full': units_full,
 
 # Aggregate all the training options in one dictionary
 training_options = {'aec_only_epochs': 25, 
-                    'init_full_epochs': 300,
-                    'best_model_epochs': 2500,
-                    'num_init_models': 20, 
+                    'init_full_epochs': 100,#300
+                    'best_model_epochs': 140, #2500
+                    'num_init_models': 1, 
                     'loss_fn': NMSE(),
                     'optimizer': keras.optimizers.Adam,
                     'optimizer_opts': {},

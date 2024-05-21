@@ -1,0 +1,5 @@
+graft data
+graft figures
+graft results
+include *.py
+include *.ipynb
